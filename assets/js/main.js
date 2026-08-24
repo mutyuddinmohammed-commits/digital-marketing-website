@@ -181,11 +181,37 @@
         return;
       }
 
-      /* No backend is wired up yet — swap this block for a fetch() to your
-         endpoint (or a form service) when the receiving inbox is ready. */
+      var formData = new FormData(form);
+
+status.classList.remove("is-error");
+status.textContent = "Sending...";
+
+fetch("https://formspree.io/f/mnpaygzb", {
+  method: "POST",
+  body: formData,
+  headers: {
+    Accept: "application/json"
+  }
+})
+  .then(function (response) {
+    if (response.ok) {
       status.classList.remove("is-error");
-      status.textContent = "Thanks — your details are with us. We will be in touch shortly.";
+      status.textContent =
+        "Thanks — your details are with us. We will be in touch shortly.";
       form.reset();
+    } else {
+      return response.json().then(function (data) {
+        throw new Error(
+          data.error || "There was a problem submitting the form."
+        );
+      });
+    }
+  })
+  .catch(function () {
+    status.classList.add("is-error");
+    status.textContent =
+      "Sorry, something went wrong. Please try again.";
+  });
     });
   }
 })();
